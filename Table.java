@@ -10,6 +10,8 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
 
+import org.graalvm.compiler.hotspot.phases.profiling.FinalizeProfileNodesPhase_OptionDescriptors;
+
 import static java.lang.Boolean.*;
 import static java.lang.System.out;
 
@@ -229,6 +231,8 @@ public class Table
      * are compared requiring attributes1 to equal attributes2.  Disambiguate attribute
      * names by append "2" to the end of any duplicate attribute name.
      *
+     * @author Shreenal Patel
+     * 
      * #usage movie.join ("studioNo", "name", studio)
      *
      * @param attributes1  the attributes of this table to be compared (Foreign Key)
@@ -247,8 +251,16 @@ public class Table
         List <Comparable []> rows = new ArrayList <> ();
 
         for(Comparable[] t1 : tuples){
-            for(Comparable[] t2 : tuples){
-
+        	Comparable[] k1 = extract(t1, t_attrs);
+            for(Comparable[] t2 : table2.tuples){
+            	Comparable[] k2 = table2.extract(t2, u_attrs);
+            	boolean flag = true;
+            	for (int i = 0; i < k1.length; i++) {
+            		if(k1[i].compareTo(k2[i]) != 0) flag = false;
+            	}
+            	if (flag) {
+            		rows.add(ArrayUtil.concat (t1, t2));
+            	}
             }
         }
 
@@ -260,6 +272,7 @@ public class Table
      * Join this table and table2 by performing an "natural join".  Tuples from both tables
      * are compared requiring common attributes to be equal.  The duplicate column is also
      * eliminated.
+     * @author Shreenal Patel
      *
      * #usage movieStar.join (starsIn)
      *
@@ -273,10 +286,66 @@ public class Table
         List <Comparable []> rows = new ArrayList <> ();
 
         //  T O   B E   I M P L E M E N T E D 
+        String common_attr = "";
+        for(int i = 0; i < attribute.length; i++) {
+            for (int j = 0; j < table2.attribute.length; j++) {
+                if(attribute[i].equals(table2.attribute[j])) {
+                    common_attr = common_attr + attribute[i] + " ";
+                }
+            }
+        }
+        common_attr = common_attr.trim();
 
+        String[] t_attrs = common_attr.split (" ");
+        String u_attr = "";
+
+        for (int i = 0; i < table2.attribute.length; i++) {
+            boolean flag = true;
+            for (int j = 0; j < t_attrs.length; j++) {
+                if (table2.attribute[i].equals(t_attrs[j])) {
+                    flag = false;
+                }
+            }
+            if (flag) {
+                u_attr = u_attr + table2.attribute[i] + " ";
+            }
+        }
+        u_attr = u_attr.trim();
+        String [] u_attrs = u_attr.split (" ");
+
+        
+        for(Comparable[] t1 : tuples){
+        	Comparable[] k1 = extract(t1, t_attrs);
+            for(Comparable[] t2 : table2.tuples){
+            	Comparable[] k2 = table2.extract(t2, t_attrs);
+            	boolean flag = true;
+            	for (int i = 0; i < k1.length; i++) {
+            		if(k1[i].compareTo(k2[i]) != 0) flag = false;
+            	}
+            	if (flag) {
+                    if (u_attr.length() == 0) {
+                        rows.add(t1);
+                    } else {
+                        Comparable[] attr2 = table2.extract(t2, u_attrs);
+                        rows.add(ArrayUtil.concat (t1, attr2));
+                    }
+            	}
+            }
+        }
+
+        Class[] final_domain;
+        String[] final_attr;
+        if (u_attr.length() == 0) {
+            final_domain = domain;
+            final_attr = attribute;
+        } else {
+            final_domain = ArrayUtil.concat (domain, extractDom(match(u_attrs), table2.domain));
+            final_attr = ArrayUtil.concat (attribute, u_attrs);
+        }
+
+        
         // FIX - eliminate duplicate columns
-        return new Table (name + count++, ArrayUtil.concat (attribute, table2.attribute),
-                                          ArrayUtil.concat (domain, table2.domain), key, rows);
+        return new Table (name + count++, final_attr, final_domain, key, rows);
     } // join
 
     /************************************************************************************
