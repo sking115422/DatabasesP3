@@ -114,6 +114,24 @@ class MovieDB
         Table t_select2 = movie.select (t -> (Integer) t[movie.col("year")] < 1980);
         t_select2.print ();
 
+        out.println ();
+        Table t_select3 = movie.select (t -> (Integer) t[movie.col("year")] < 1980 && (Integer) t[movie.col("year")] > 1960);
+        t_select3.print ();
+
+        out.println ();
+        Table t_select4 = movie.select (t -> (Integer) t[movie.col("year")] < 1980 && t[movie.col("title")].equals("Star_Wars"));
+        t_select4.print ();
+
+        out.println ();
+        Table t_select5 = movie.select (t -> (Integer) t[movie.col("year")] < 1990 || t[movie.col("title")].equals("Star_Wars"));
+        t_select5.print ();
+
+        out.println ();
+        Table t_select6 = movie.select (t -> (Integer) t[movie.col("year")] < 1990 && !( t[movie.col("title")].equals("Star_Wars")));
+        t_select6.print ();
+
+
+        
         //--------------------- indexed select: key
 
         out.println ();
@@ -122,15 +140,15 @@ class MovieDB
 
         //--------------------- union: movie UNION cinema
 
-        out.println ();
-        Table t_union = movie.union (cinema);
-        t_union.print ();
+        // out.println ();
+        // Table t_union = movie.union (cinema);
+        // t_union.print ();
 
-        //--------------------- minus: movie MINUS cinema
+        // //--------------------- minus: movie MINUS cinema
 
-        out.println ();
-        Table t_minus = movie.minus (cinema);
-        t_minus.print ();
+        // out.println ();
+        // Table t_minus = movie.minus (cinema);
+        // t_minus.print ();
 
         //--------------------- equi-join: movie JOIN studio ON studioName = name
 
@@ -143,6 +161,8 @@ class MovieDB
         out.println ();
         Table t_join2 = movie.join (cinema);
         t_join2.print ();
+
+        
 
     } // main
 
