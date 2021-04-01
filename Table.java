@@ -284,6 +284,8 @@ public class Table
         out.println ("RA> " + name + ".join (" + table2.name + ")");
 
         List <Comparable []> rows = new ArrayList <> ();
+        Class[] final_domain;
+        String[] final_attr;
 
         //  T O   B E   I M P L E M E N T E D 
         String common_attr = "";
@@ -295,52 +297,57 @@ public class Table
             }
         }
         common_attr = common_attr.trim();
+        if (common_attr.length() != 0) {
+            
+            String[] t_attrs = common_attr.split (" ");
+            String u_attr = "";
 
-        String[] t_attrs = common_attr.split (" ");
-        String u_attr = "";
-
-        for (int i = 0; i < table2.attribute.length; i++) {
-            boolean flag = true;
-            for (int j = 0; j < t_attrs.length; j++) {
-                if (table2.attribute[i].equals(t_attrs[j])) {
-                    flag = false;
+            for (int i = 0; i < table2.attribute.length; i++) {
+                boolean flag = true;
+                for (int j = 0; j < t_attrs.length; j++) {
+                    if (table2.attribute[i].equals(t_attrs[j])) {
+                        flag = false;
+                    }
+                }
+                if (flag) {
+                    u_attr = u_attr + table2.attribute[i] + " ";
                 }
             }
-            if (flag) {
-                u_attr = u_attr + table2.attribute[i] + " ";
-            }
-        }
-        u_attr = u_attr.trim();
-        String [] u_attrs = u_attr.split (" ");
+            u_attr = u_attr.trim();
+            String [] u_attrs = u_attr.split (" ");
 
-        
-        for(Comparable[] t1 : tuples){
-        	Comparable[] k1 = extract(t1, t_attrs);
-            for(Comparable[] t2 : table2.tuples){
-            	Comparable[] k2 = table2.extract(t2, t_attrs);
-            	boolean flag = true;
-            	for (int i = 0; i < k1.length; i++) {
-            		if(k1[i].compareTo(k2[i]) != 0) flag = false;
-            	}
-            	if (flag) {
-                    if (u_attr.length() == 0) {
-                        rows.add(t1);
-                    } else {
-                        Comparable[] attr2 = table2.extract(t2, u_attrs);
-                        rows.add(ArrayUtil.concat (t1, attr2));
+            
+            for(Comparable[] t1 : tuples){
+                Comparable[] k1 = extract(t1, t_attrs);
+                for(Comparable[] t2 : table2.tuples){
+                    Comparable[] k2 = table2.extract(t2, t_attrs);
+                    boolean flag = true;
+                    for (int i = 0; i < k1.length; i++) {
+                        if(k1[i].compareTo(k2[i]) != 0) flag = false;
                     }
-            	}
+                    if (flag) {
+                        if (u_attr.length() == 0) {
+                            rows.add(t1);
+                        } else {
+                            Comparable[] attr2 = table2.extract(t2, u_attrs);
+                            rows.add(ArrayUtil.concat (t1, attr2));
+                        }
+                    }
+                }
             }
-        }
 
-        Class[] final_domain;
-        String[] final_attr;
-        if (u_attr.length() == 0) {
-            final_domain = domain;
-            final_attr = attribute;
+            
+            if (u_attr.length() == 0) {
+                final_domain = domain;
+                final_attr = attribute;
+            } else {
+                final_domain = ArrayUtil.concat (domain, extractDom(match(u_attrs), table2.domain));
+                final_attr = ArrayUtil.concat (attribute, u_attrs);
+            }
+
         } else {
-            final_domain = ArrayUtil.concat (domain, extractDom(match(u_attrs), table2.domain));
-            final_attr = ArrayUtil.concat (attribute, u_attrs);
+            final_attr = ArrayUtil.concat (attribute, table2.attribute);
+            final_domain = ArrayUtil.concat (domain, table2.domain);
         }
 
         

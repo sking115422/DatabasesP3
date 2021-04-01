@@ -162,7 +162,9 @@ class MovieDB
         Table t_join2 = movie.join (cinema);
         t_join2.print ();
 
-        
+        out.println ();
+        Table t_join3 = movieExec.join (starsIn);
+        t_join3.print ();
 
     } // main
 
