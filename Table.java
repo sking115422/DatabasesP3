@@ -131,6 +131,7 @@ public class Table
      *
      * #usage movie.project ("title year studioNo")
      *
+     * @author Daniel Abramow
      * @param attributes  the attributes to project onto
      * @return  a table of projected tuples
      */
@@ -171,6 +172,7 @@ public class Table
      * Select the tuples satisfying the given key predicate (key = value).  Use an index
      * (Map) to retrieve the tuple with the given key value.
      *
+     * @author Daniel Abramow
      * @param keyVal  the given key value
      * @return  a table with the tuple satisfying the key predicate
      */
